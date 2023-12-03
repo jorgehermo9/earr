@@ -1,0 +1,3 @@
+mod filesystem_audio_gatherer_repository;
+
+pub use filesystem_audio_gatherer_repository::FilesystemAudioGathererRepository;

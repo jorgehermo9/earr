@@ -5,4 +5,10 @@ edition = "2021"
 
 
 [dependencies]
+anyhow = "1.0.75"
+audiotags = "0.4.1"
+derive_builder = "0.12.0"
 dotenvy = "0.15.7"
+symphonia = "0.5.3"
+thiserror = "1.0.50"
+walkdir = "2.4.0"

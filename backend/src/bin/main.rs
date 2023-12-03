@@ -1,9 +1,18 @@
 use dotenvy::dotenv;
+use earr::{
+    domain::repository::AudioGathererRepository,
+    infrastructure::repository::FilesystemAudioGathererRepository,
+};
+
 use std::env;
 fn main() {
     dotenv().ok();
 
     let music_dir = env::var("MUSIC_DIR").unwrap();
 
-    println!("MUSIC_DIR: {}", music_dir);
+    let audio_gatherer_repository = FilesystemAudioGathererRepository::new(music_dir);
+    dbg!(audio_gatherer_repository
+        .gather()
+        .unwrap()
+        .collect::<Vec<_>>());
 }
