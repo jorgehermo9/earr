@@ -1,50 +1,25 @@
 use std::fmt::{self, Formatter};
 
 use derive_builder::Builder;
+use derive_getters::Getters;
 
-#[derive(Builder)]
+use self::{artist::Artist, cover::Cover, genre::Genre, title::Title, year::Year};
+
+pub mod artist;
+pub mod cover;
+pub mod genre;
+pub mod title;
+pub mod year;
+
+#[derive(Builder, Getters)]
 pub struct Audio {
-    title: String,
-    artist: String,
-    year: Option<i32>,
-    album_title: String,
-    album_artist: String,
-    album_cover: Option<Vec<u8>>,
-    // track_number: u32,
-    // total_tracks: u32,
-    // disk_number: u32,
-    // total_disks: u32,
-    genre: String,
-}
-
-impl Audio {
-    pub fn title(&self) -> &str {
-        &self.title
-    }
-
-    pub fn artist(&self) -> &str {
-        &self.artist
-    }
-
-    pub fn year(&self) -> &Option<i32> {
-        &self.year
-    }
-
-    pub fn album_title(&self) -> &str {
-        &self.album_title
-    }
-
-    pub fn album_artist(&self) -> &str {
-        &self.album_artist
-    }
-
-    pub fn album_cover(&self) -> &Option<Vec<u8>> {
-        &self.album_cover
-    }
-
-    pub fn genre(&self) -> &str {
-        &self.genre
-    }
+    title: Title,
+    artist: Artist,
+    year: Option<Year>,
+    album_title: Title,
+    album_artist: Artist,
+    album_cover: Cover,
+    genre: Genre,
 }
 
 impl fmt::Debug for Audio {
