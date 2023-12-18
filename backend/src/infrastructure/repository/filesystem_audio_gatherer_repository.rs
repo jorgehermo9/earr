@@ -1,4 +1,5 @@
 use self::audio_parser::audiotags::AudiotagsAudioParser;
+use self::audio_parser::ffmpeg::FfmpegAudioParser;
 use self::audio_parser::{AudioParser, AudioParserError};
 use crate::domain::entity::audio::Audio;
 use crate::domain::repository::AudioGathererRepository;
@@ -52,3 +53,6 @@ impl<AP: AudioParser> AudioGathererRepository for FilesystemAudioGathererReposit
 
 pub type AudiotagsFilesystemAudioGathererRepository =
     FilesystemAudioGathererRepository<AudiotagsAudioParser>;
+
+pub type FfmpegFilesystemAudioGathererRepository =
+    FilesystemAudioGathererRepository<FfmpegAudioParser>;

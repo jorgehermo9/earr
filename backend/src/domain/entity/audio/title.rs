@@ -3,7 +3,7 @@ use std::str::FromStr;
 use thiserror::Error;
 
 #[derive(Debug, Clone)]
-pub struct Title(String);
+pub struct Title(pub String);
 
 #[derive(Debug, Error)]
 pub enum TitleError {

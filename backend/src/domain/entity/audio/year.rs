@@ -1,7 +1,7 @@
 use thiserror::Error;
 
 #[derive(Debug, Copy, Clone)]
-pub struct Year(u16);
+pub struct Year(pub u16);
 
 impl Year {
     pub fn new(year: u16) -> Self {
