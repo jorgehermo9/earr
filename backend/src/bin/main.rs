@@ -10,12 +10,12 @@ fn main() {
 
     let music_dir = env::var("MUSIC_DIR").unwrap();
 
-    let audio_gatherer_repository =
-        earr::infrastructure::repository::AudiotagsFilesystemAudioGathererRepository::new(
-            music_dir,
-        );
     // let audio_gatherer_repository =
-    // earr::infrastructure::repository::FfmpegFilesystemAudioGathererRepository::new(music_dir);
+    // earr::infrastructure::repository::AudiotagsFilesystemAudioGathererRepository::new(
+    // music_dir,
+    // );
+    let audio_gatherer_repository =
+        earr::infrastructure::repository::FfmpegFilesystemAudioGathererRepository::new(music_dir);
 
     let audios = audio_gatherer_repository.gather().unwrap();
 
