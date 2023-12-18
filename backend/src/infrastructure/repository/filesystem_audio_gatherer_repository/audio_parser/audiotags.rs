@@ -14,11 +14,18 @@ pub struct AudiotagsAudioParser;
 pub enum AudiotagsAudioParserError {
     #[error("Failed to read tags: {0}")]
     Audiotags(#[from] audiotags::Error),
+    #[error("No file extesion")]
+    NoExtension,
 }
 
 impl AudioParser for AudiotagsAudioParser {
     fn parse(entry: walkdir::DirEntry) -> Result<Audio, AudioParserError> {
         let entry_path = entry.path();
+        if entry_path.extension().is_none() {
+            return Err(AudioParserError::Inner(Box::new(
+                AudiotagsAudioParserError::NoExtension,
+            )));
+        }
         let audio_tags = Tag::new()
             .read_from_path(entry_path)
             .map_err(|err| AudioParserError::Inner(Box::new(err)))?;
