@@ -19,13 +19,13 @@ fn main() {
 
     let audios = audio_gatherer_repository.gather().unwrap();
 
-    for audio in audios {
-        // write cover vec8 to file
-        std::fs::write(format!("{}.png", audio.title().0), &audio.album_cover().0).unwrap();
+    for (idx, _audio) in audios.enumerate() {
+        if idx % 100 == 0 {
+            println!("Processed {} audios", idx + 1);
+        }
     }
-
-    dbg!(audio_gatherer_repository
-        .gather()
-        .unwrap()
-        .collect::<Vec<_>>());
+    // dbg!(audio_gatherer_repository
+    //     .gather()
+    //     .unwrap()
+    //     .collect::<Vec<_>>());
 }
