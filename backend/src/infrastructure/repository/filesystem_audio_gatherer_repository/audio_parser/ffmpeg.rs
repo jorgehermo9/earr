@@ -116,7 +116,6 @@ impl FfmpegAudioParser {
             .output()
             .map_err(FfmpegAudioParserError::Ffprobe)?;
         let ffprobe_output = String::from_utf8(ffprobe_output.stdout)?;
-        println!("{ffprobe_output}");
         let ffprobe_output: FfprobeOutput = serde_json::from_str(&ffprobe_output)?;
         Ok(ffprobe_output)
     }
