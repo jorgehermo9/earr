@@ -32,13 +32,13 @@ impl TryableAudioParser for ResilientAudioParser {
         )))?;
         Self::parse_inner(first_parser.as_ref(), &parsers[1..], entry)
     }
-
 }
 
 #[macro_export]
 macro_rules! resilient_getter {
     ($field:ident, $current_parsed_audio_try:ident, $next_parsed_audio_try_lazy:ident) => {
         $current_parsed_audio_try.$field.or_else(|_e| {
+            println!("Failed to parse field: {}, next parser", stringify!($field));
             $next_parsed_audio_try_lazy
                 .deref()
                 .as_ref()
