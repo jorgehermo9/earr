@@ -1,11 +1,11 @@
-use super::audio_parser::{AudioParser, AudioParserError};
 use crate::domain::entity::audio::Audio;
 use crate::domain::repository::AudioGathererRepository;
-use rayon::prelude::*;
 use std::io;
 use std::path::{Path, PathBuf};
 use thiserror::Error;
 use walkdir::WalkDir;
+
+use super::audio_parser::{AudioParser, AudioParserError};
 
 pub struct FilesystemAudioGathererRepository<AP: AudioParser> {
     path: PathBuf,
@@ -32,21 +32,18 @@ pub enum FilesystemAudioGathererRepositoryError {
 impl<AP: AudioParser + Default> AudioGathererRepository for FilesystemAudioGathererRepository<AP> {
     type Error = FilesystemAudioGathererRepositoryError;
     fn gather(&self) -> Result<Box<dyn Iterator<Item = Audio>>, Self::Error> {
-        let walker = WalkDir::new(&self.path).into_iter().collect::<Vec<_>>();
+        let walker = WalkDir::new(&self.path).into_iter();
         let audio_iter = walker
-            .par_iter()
             .flatten()
             .filter(|entry| entry.file_type().is_file())
             .filter_map(|entry| {
                 AP::default()
-                    .parse(entry)
+                    .parse(&entry)
                     .map_err(|e| {
                         eprintln!("Failed to read audio: {}", e);
                     })
                     .ok()
-            })
-            .collect::<Vec<_>>()
-            .into_iter();
+            });
 
         Ok(Box::new(audio_iter))
     }
