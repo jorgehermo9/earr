@@ -104,6 +104,7 @@ impl TryableAudioParser for FfmpegAudioParser {
             year,
             album_title,
             album_artist,
+            // TODO: use Lazy<_> for the album cover in the ParsedAudioTry class...
             album_cover,
             genre,
         };
