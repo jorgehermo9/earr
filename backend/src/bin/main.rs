@@ -30,20 +30,20 @@ fn main() {
             println!("Processed {} audios", idx + 1);
         }
     }
-    dbg!(audios);
+    // dbg!(audios);
 
-    let ffmpeg_audios = FilesystemAudioGathererRepository::<FfmpegAudioParser>::new(&music_dir)
-        .gather()
-        .unwrap()
-        .collect::<Vec<_>>();
+    // let ffmpeg_audios = FilesystemAudioGathererRepository::<FfmpegAudioParser>::new(&music_dir)
+    //     .gather()
+    //     .unwrap()
+    //     .collect::<Vec<_>>();
 
-    let audiotags_audios =
-        FilesystemAudioGathererRepository::<AudiotagsAudioParser>::new(&music_dir)
-            .gather()
-            .unwrap()
-            .collect::<Vec<_>>();
+    // let audiotags_audios =
+    //     FilesystemAudioGathererRepository::<AudiotagsAudioParser>::new(&music_dir)
+    //         .gather()
+    //         .unwrap()
+    //         .collect::<Vec<_>>();
 
-    for (ffmpeg_audio, audiotags_audio) in ffmpeg_audios.iter().zip(audiotags_audios.iter()) {
-        assert_eq!(ffmpeg_audio, audiotags_audio);
-    }
+    // for (ffmpeg_audio, audiotags_audio) in ffmpeg_audios.iter().zip(audiotags_audios.iter()) {
+    //     assert_eq!(ffmpeg_audio, audiotags_audio);
+    // }
 }
