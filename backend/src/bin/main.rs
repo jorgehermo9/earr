@@ -20,16 +20,18 @@ fn main() {
     let audio_gatherer_repository =
         FilesystemAudioGathererRepository::<ResilientAudioParser>::new(&music_dir);
 
-    let audios = audio_gatherer_repository
-        .gather()
-        .unwrap()
-        .collect::<Vec<_>>();
+    let audios = audio_gatherer_repository.gather().unwrap();
 
-    for (idx, _audio) in audios.iter().enumerate() {
+    for (idx, _audio) in audios.enumerate() {
         if idx % 100 == 0 {
             println!("Processed {} audios", idx + 1);
         }
     }
+    
+    let audios = audio_gatherer_repository
+        .gather()
+        .unwrap()
+        .collect::<Vec<_>>();
     // dbg!(audios);
 
     // let ffmpeg_audios = FilesystemAudioGathererRepository::<FfmpegAudioParser>::new(&music_dir)

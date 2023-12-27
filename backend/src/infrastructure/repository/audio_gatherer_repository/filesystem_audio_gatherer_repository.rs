@@ -36,6 +36,7 @@ impl<AP: AudioParser + Default> AudioGathererRepository for FilesystemAudioGathe
         let audio_iter = walker
             .flatten()
             .filter(|entry| entry.file_type().is_file())
+            // TODO: collect into vec and use rayon
             .filter_map(|entry| {
                 AP::default()
                     .parse(&entry)
