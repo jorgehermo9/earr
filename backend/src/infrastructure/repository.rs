@@ -1,5 +1,1 @@
-pub mod filesystem_audio_gatherer_repository;
-
-pub use filesystem_audio_gatherer_repository::AudiotagsFilesystemAudioGathererRepository;
-pub use filesystem_audio_gatherer_repository::FfmpegFilesystemAudioGathererRepository;
-pub use filesystem_audio_gatherer_repository::FilesystemAudioGathererRepository;
+pub mod audio_gatherer_repository;

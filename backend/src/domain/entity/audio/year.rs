@@ -1,6 +1,6 @@
 use thiserror::Error;
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Year(pub u16);
 
 impl Year {

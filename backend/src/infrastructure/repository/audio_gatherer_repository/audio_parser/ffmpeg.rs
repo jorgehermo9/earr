@@ -1,14 +1,18 @@
-use std::process::{Command, Stdio};
+use std::{
+    num::ParseIntError,
+    process::{Command, Stdio},
+};
 
 use chrono::{Datelike, NaiveDate};
 use derive_getters::Getters;
 use serde::Deserialize;
 use thiserror::Error;
 
-use crate::domain::entity::audio::{cover::Cover, year::Year, Audio, AudioBuilder};
+use crate::domain::entity::audio::{cover::Cover, year::Year};
 
-use super::{AudioParser, AudioParserError};
+use super::{AudioParserError, AudioParserResult, ParsedAudioTry, TryableAudioParser};
 
+#[derive(Default)]
 pub struct FfmpegAudioParser;
 
 #[derive(Error, Debug)]
@@ -21,10 +25,14 @@ pub enum FfmpegAudioParserError {
     FfprobeJson(#[from] serde_json::Error),
     #[error("Failed to execute ffmpeg: {0}")]
     Ffmpeg(std::io::Error),
+    #[error("Invalid date: {0}")]
+    InvalidDate(#[from] chrono::ParseError),
+    #[error("Invalid year: {0}")]
+    InvalidYear(#[from] ParseIntError),
 }
 
-impl AudioParser for FfmpegAudioParser {
-    fn parse(entry: walkdir::DirEntry) -> Result<Audio, AudioParserError> {
+impl TryableAudioParser for FfmpegAudioParser {
+    fn try_parse(&self, entry: &walkdir::DirEntry) -> AudioParserResult<ParsedAudioTry> {
         let entry_path = entry.path();
         let ffprobe_output = Self::get_ffprobe_output(entry_path)
             .map_err(|err| AudioParserError::Inner(Box::new(err)))?;
@@ -36,67 +44,70 @@ impl AudioParser for FfmpegAudioParser {
         let title = tags
             .title()
             .as_deref()
-            .map(str::parse)
-            .transpose()
-            .map_err(AudioParserError::Title)?
-            .unwrap_or_default();
+            .ok_or(AudioParserError::MissingField("title".to_owned()))
+            .and_then(|title| title.parse().map_err(AudioParserError::Title));
 
         let artist = tags
             .artist()
             .as_deref()
-            .map(str::parse)
-            .transpose()
-            .map_err(AudioParserError::Artist)?
-            .unwrap_or_default();
+            .ok_or(AudioParserError::MissingField("artist".to_owned()))
+            .and_then(|artist| artist.parse().map_err(AudioParserError::Artist));
 
         let year = tags
             .year()
             .as_deref()
-            .and_then(|year| year.parse().ok())
-            .or(tags.date().as_deref().and_then(|date| {
-                NaiveDate::parse_from_str(date, "%Y-%m-%d")
-                    .or_else(|_| NaiveDate::parse_from_str(date, "%Y"))
-                    .map(|date| date.year())
-                    .ok()
-            }))
-            .and_then(|year| Year::try_from(year).ok());
+            .ok_or(AudioParserError::MissingField("year".to_owned()))
+            .and_then(|year| {
+                year.parse::<i32>()
+                    .map_err(|e| AudioParserError::Inner(Box::new(FfmpegAudioParserError::from(e))))
+            })
+            .or_else(|_| {
+                tags.date()
+                    .as_deref()
+                    .ok_or(AudioParserError::MissingField("date".to_owned()))
+                    .and_then(|date| {
+                        NaiveDate::parse_from_str(date, "%Y-%m-%d")
+                            .or_else(|_| NaiveDate::parse_from_str(date, "%Y"))
+                            .map(|date| date.year())
+                            .map_err(|e| {
+                                AudioParserError::Inner(Box::new(FfmpegAudioParserError::from(e)))
+                            })
+                    })
+            })
+            .and_then(|year| Year::try_from(year).map_err(AudioParserError::Year));
 
         let album_title = tags
             .album()
             .as_deref()
-            .map(str::parse)
-            .transpose()
-            .map_err(AudioParserError::AlbumTitle)?
-            .unwrap_or_default();
+            .ok_or(AudioParserError::MissingField("album_title".to_owned()))
+            .and_then(|album_title| album_title.parse().map_err(AudioParserError::AlbumTitle));
 
         let album_artist = tags
             .album_artist()
             .as_deref()
-            .map(str::parse)
-            .transpose()
-            .map_err(AudioParserError::AlbumArtist)?
-            .unwrap_or_default();
+            .ok_or(AudioParserError::MissingField("album_artist".to_owned()))
+            .and_then(|album_artist| album_artist.parse().map_err(AudioParserError::AlbumArtist));
 
         let genre = tags
             .genre()
             .as_deref()
-            .map(str::parse)
-            .transpose()?
-            .unwrap_or_default();
+            .ok_or(AudioParserError::MissingField("genre".to_owned()))
+            .and_then(|genre| genre.parse().map_err(AudioParserError::Genre));
 
-        let cover = Self::get_cover_bytes(entry_path)
+        let album_cover = Self::get_cover_bytes(entry_path)
             .map_err(|err| AudioParserError::Inner(Box::new(err)))
-            .map(Cover::try_from)??;
+            .and_then(|cover| Cover::try_from(cover).map_err(AudioParserError::Cover));
 
-        Ok(AudioBuilder::default()
-            .title(title)
-            .artist(artist)
-            .year(year)
-            .album_title(album_title)
-            .album_artist(album_artist)
-            .genre(genre)
-            .album_cover(cover)
-            .build()?)
+        let parsed_audio_try = ParsedAudioTry {
+            title,
+            artist,
+            year,
+            album_title,
+            album_artist,
+            album_cover,
+            genre,
+        };
+        Ok(parsed_audio_try)
     }
 }
 

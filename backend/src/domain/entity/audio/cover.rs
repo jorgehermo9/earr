@@ -2,7 +2,7 @@ use thiserror::Error;
 
 static DEFAULT_COVER: &[u8] = include_bytes!("./cover/default_cover.png");
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Cover(pub Vec<u8>);
 
 #[derive(Debug, Error)]

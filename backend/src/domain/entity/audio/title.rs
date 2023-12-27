@@ -2,7 +2,7 @@ use std::str::FromStr;
 
 use thiserror::Error;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Title(pub String);
 
 #[derive(Debug, Error)]

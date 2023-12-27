@@ -1,0 +1,5 @@
+pub mod audio_parser;
+
+mod filesystem_audio_gatherer_repository;
+pub use filesystem_audio_gatherer_repository::FilesystemAudioGathererRepository;
+pub use filesystem_audio_gatherer_repository::FilesystemAudioGathererRepositoryError;

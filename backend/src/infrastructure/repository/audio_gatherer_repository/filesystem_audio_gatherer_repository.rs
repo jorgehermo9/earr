@@ -1,6 +1,3 @@
-use self::audio_parser::audiotags::AudiotagsAudioParser;
-use self::audio_parser::ffmpeg::FfmpegAudioParser;
-use self::audio_parser::{AudioParser, AudioParserError};
 use crate::domain::entity::audio::Audio;
 use crate::domain::repository::AudioGathererRepository;
 use std::io;
@@ -8,7 +5,7 @@ use std::path::{Path, PathBuf};
 use thiserror::Error;
 use walkdir::WalkDir;
 
-mod audio_parser;
+use super::audio_parser::{AudioParser, AudioParserError};
 
 pub struct FilesystemAudioGathererRepository<AP: AudioParser> {
     path: PathBuf,
@@ -32,7 +29,7 @@ pub enum FilesystemAudioGathererRepositoryError {
     AudioParser(#[from] AudioParserError),
 }
 
-impl<AP: AudioParser> AudioGathererRepository for FilesystemAudioGathererRepository<AP> {
+impl<AP: AudioParser + Default> AudioGathererRepository for FilesystemAudioGathererRepository<AP> {
     type Error = FilesystemAudioGathererRepositoryError;
     fn gather(&self) -> Result<Box<dyn Iterator<Item = Audio>>, Self::Error> {
         let walker = WalkDir::new(&self.path).into_iter();
@@ -40,7 +37,8 @@ impl<AP: AudioParser> AudioGathererRepository for FilesystemAudioGathererReposit
             .flatten()
             .filter(|entry| entry.file_type().is_file())
             .filter_map(|entry| {
-                AP::parse(entry)
+                AP::default()
+                    .parse(&entry)
                     .map_err(|e| {
                         eprintln!("Failed to read audio: {}", e);
                     })
@@ -50,9 +48,3 @@ impl<AP: AudioParser> AudioGathererRepository for FilesystemAudioGathererReposit
         Ok(Box::new(audio_iter))
     }
 }
-
-pub type AudiotagsFilesystemAudioGathererRepository =
-    FilesystemAudioGathererRepository<AudiotagsAudioParser>;
-
-pub type FfmpegFilesystemAudioGathererRepository =
-    FilesystemAudioGathererRepository<FfmpegAudioParser>;
